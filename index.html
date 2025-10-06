@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In / Sign Up</title>
+    <!-- Combined CSS for modern, responsive design and Dark Mode -->
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --error-color: #dc3545;
+            --success-color: #27ae60;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Dark Mode Variables */
+        .dark-mode {
+            --primary-color: #1e88e5;
+            --secondary-color: #b0bec5;
+            --text-color: #f1f1f1;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --error-color: #ff5252;
+            --success-color: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: color 0.3s, background-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* --- Layout & Card --- */
+        .auth-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        /* --- Form Elements --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        /* --- Messages --- */
+        .message-box {
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .message-box.error {
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .message-box.success {
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+            background-color: rgba(39, 174, 96, 0.1);
+        }
+
+        /* --- Toggles and Links --- */
+        .toggle-link-container {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95em;
+        }
+
+        .toggle-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #signup-section {
+            display: none;
+        }
+
+        /* --- Dark Mode Switch --- */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 45px;
+            height: 25px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 25px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 21px;
+            width: 21px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .auth-card {
+                padding: 25px 15px;
+                margin: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+
+            <div class="toggle-switch">
+                <span>Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Message Box for Errors/Success -->
+            <div id="message-box" class="message-box"></div>
+
+            <!-- SIGN IN SECTION -->
+            <div id="signin-section">
+                <h2>Sign In</h2>
+                <form id="signin-form">
+                    <div class="form-group">
+                        <label for="signin-email">Email</label>
+                        <input type="email" id="signin-email" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="signin-password">Password</label>
+                        <input type="password" id="signin-password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn">Sign In</button>
+                </form>
+                <p class="toggle-link-container">
+                    Don't have an account?
+                    <a class="toggle-link" id="show-signup">Create Account</a>
+                </p>
+            </div>
+
+            <!-- SIGN UP SECTION -->
+            <div id="signup-section">
+                <h2>Create Account</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" required autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn">Sign Up</button>
+                </form>
+                <p class="toggle-link-container">
+                    Already have an account?
+                    <a class="toggle-link" id="show-signin">Sign In</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Utility Functions ---
+
+        /** Shows a message in the designated box. */
+        function showMessage(text, type = 'error') {
+            const box = document.getElementById('message-box');
+            box.textContent = text;
+            box.className = 'message-box ' + type;
+            box.style.display = 'block';
+        }
+
+        /** Clears the message box. */
+        function clearMessage() {
+            const box = document.getElementById('message-box');
+            box.style.display = 'none';
+            box.className = 'message-box';
+            box.textContent = '';
+        }
+
+        /** Toggles between Sign In and Sign Up forms. */
+        function toggleForm(mode) {
+            clearMessage();
+            const signInSection = document.getElementById('signin-section');
+            const signUpSection = document.getElementById('signup-section');
+
+            signInSection.style.display = mode === 'signin' ? 'block' : 'none';
+            signUpSection.style.display = mode === 'signup' ? 'block' : 'none';
+
+            // Clear forms when switching
+            document.getElementById('signin-form').reset();
+            document.getElementById('signup-form').reset();
+        }
+
+        // --- Event Listeners and Initial Setup ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for existing session and redirect
+            if (localStorage.getItem('loggedInUser')) {
+                window.location.href = 'store.html';
+                return;
+            }
+
+            // Dark Mode Initialization
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            darkModeToggle.checked = isDarkMode;
+
+            darkModeToggle.addEventListener('change', (e) => {
+                document.body.classList.toggle('dark-mode', e.target.checked);
+                localStorage.setItem('darkMode', e.target.checked);
+            });
+
+            // Form Toggling Setup
+            document.getElementById('show-signup').addEventListener('click', () => toggleForm('signup'));
+            document.getElementById('show-signin').addEventListener('click', () => toggleForm('signin'));
+
+            // Sign Up Submission Handler
+            document.getElementById('signup-form').addEventListener('submit', handleSignUp);
+
+            // Sign In Submission Handler
+            document.getElementById('signin-form').addEventListener('submit', handleSignIn);
+        });
+
+        // --- Core Logic Functions ---
+
+        function handleSignUp(e) {
+            e.preventDefault();
+            clearMessage();
+
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                showMessage("Passwords do not match.", 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage("Password must be at least 6 characters long.", 'error');
+                return;
+            }
+
+            // Check if user already exists
+            if (localStorage.getItem(email)) {
+                showMessage("This email is already registered. Please sign in.", 'error');
+                return;
+            }
+
+            // Save user data in LocalStorage
+            localStorage.setItem(email, password);
+
+            showMessage("Success! Account created. Please sign in now.", 'success');
+
+            // Switch to Sign In form after successful sign up
+            document.getElementById('signup-form').reset();
+            toggleForm('signin');
+        }
+
+        function handleSignIn(e) {
+            e.preventDefault();
+            clearMessage();
+
+            const email = document.getElementById('signin-email').value.trim();
+            const password = document.getElementById('signin-password').value;
+
+            const storedPassword = localStorage.getItem(email);
+
+            // Validation against stored credentials
+            if (storedPassword && storedPassword === password) {
+                // Success: Store session state and redirect
+                localStorage.setItem('loggedInUser', email);
+                window.location.href = 'store.html';
+            } else {
+                // Failure
+                showMessage("Invalid email or password. Please try again.", 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

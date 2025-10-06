@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Store</title>
+    <style>
+        /* --- CSS Variables and Dark Mode Setup --- */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --error-color: #dc3545;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dark-mode {
+            --primary-color: #1e88e5;
+            --secondary-color: #b0bec5;
+            --text-color: #f1f1f1;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --error-color: #ff5252;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: color 0.3s, background-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- Header & Controls --- */
+        .store-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .store-header h1 {
+            color: var(--primary-color);
+            font-size: 2em;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #logout-btn {
+            background-color: var(--error-color);
+        }
+
+        #logout-btn:hover {
+            background-color: #a71d2a;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .controls input,
+        .controls select {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            min-width: 180px;
+        }
+
+        .controls input#search-input {
+            flex-grow: 2;
+            /* Search bar takes more space */
+        }
+
+        .error-message {
+            color: var(--error-color);
+            padding: 15px;
+            border: 1px solid var(--error-color);
+            background-color: rgba(220, 53, 69, 0.1);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        /* --- Product Grid (Responsive) --- */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image-wrapper {
+            width: 100%;
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .product-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .product-title {
+            font-weight: 600;
+            margin: 10px 0;
+            font-size: 1.15em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            min-height: 50px;
+            /* Consistent height for title */
+        }
+
+        .product-category {
+            font-size: 0.8em;
+            color: var(--secondary-color);
+            background-color: rgba(108, 117, 125, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.4em;
+            color: var(--primary-color);
+            margin-top: auto;
+            font-weight: bold;
+            padding-top: 10px;
+        }
+
+        /* --- Dark Mode Switch --- */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            justify-content: flex-end;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 45px;
+            height: 25px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 25px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 21px;
+            width: 21px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        /* --- Mobile Responsiveness (4. UI/UX Requirement) --- */
+        @media (max-width: 768px) {
+            .store-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .store-header h1 {
+                margin-bottom: 10px;
+                font-size: 1.6em;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .controls input,
+            .controls select {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+                /* Single column on mobile */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="store-header">
+            <h1>Product Catalog</h1>
+            <!-- Logout Button (Bonus) -->
+            <button id="logout-btn" class="btn">Logout</button>
+        </header>
+
+        <!-- Dark Mode Toggle (Bonus) -->
+        <div class="toggle-switch">
+            <span>Dark Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="controls">
+            <!-- Search Bar (Bonus) -->
+            <input type="text" id="search-input" placeholder="Search products by title...">
+
+            <!-- Filter 1: Category -->
+            <select id="category-filter">
+                <option value="">All Categories</option>
+                <!-- Categories populated by JS -->
+            </select>
+
+            <!-- Filter 2: Price Range (Updated to show PKR ranges) -->
+            <select id="price-filter">
+                <option value="">All Prices</option>
+                <option value="0-50">PKR 0 - 14,000</option>
+                <option value="50-100">PKR 14,000 - 28,000</option>
+                <option value="100-200">PKR 28,000 - 56,000</option>
+                <option value="200-max">PKR 56,000+</option>
+            </select>
+        </div>
+
+        <!-- Product Grid Display Area -->
+        <div class="product-grid" id="product-list">
+            <p style="text-align:center;">Loading products...</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const applyDarkMode = (isDark) => {
+            document.body.classList.toggle('dark-mode', isDark);
+            localStorage.setItem('darkMode', isDark);
+        };
+
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = isDarkMode;
+        applyDarkMode(isDarkMode);
+
+        darkModeToggle.addEventListener('change', (e) => {
+            applyDarkMode(e.target.checked);
+        });
+        // -----------------------
+
+        // API Configuration for fetching 300 products (100 per call)
+        const BASE_PRODUCT_API = 'https://dummyjson.com/products';
+        const BATCH_SIZE = 100;
+        const NUM_BATCHES = 3;
+        // Conversion rate (approx $1 USD = 280 PKR)
+        const PKR_RATE = 280;
+
+        const productList = document.getElementById('product-list');
+        const searchInput = document.getElementById('search-input');
+        const categoryFilter = document.getElementById('category-filter');
+        const priceFilter = document.getElementById('price-filter');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        let allProducts = [];
+
+        // --- Session Check and Logout ---
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('loggedInUser')) {
+                // If not logged in, redirect to index.html (Sign In page)
+                window.location.href = 'index.html';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('loggedInUser'); // Clear the session
+            window.location.href = 'index.html';
+        });
+
+        // --- Fetch Products (Now fetches 300 products in batches) ---
+        async function fetchProducts() {
+            try {
+                productList.innerHTML = '<p style="text-align:center;">Fetching 300 products, please wait...</p>';
+                allProducts = []; // Reset the product list
+
+                const fetchPromises = [];
+                for (let i = 0; i < NUM_BATCHES; i++) {
+                    const skip = i * BATCH_SIZE;
+                    const apiUrl = `${BASE_PRODUCT_API}?limit=${BATCH_SIZE}&skip=${skip}`;
+                    fetchPromises.push(fetch(apiUrl).then(res => {
+                        if (!res.ok) throw new Error(`Failed to fetch batch ${i + 1}`);
+                        return res.json();
+                    }));
+                }
+
+                const results = await Promise.all(fetchPromises);
+
+                // Aggregate products from all batches
+                results.forEach(data => {
+                    // DummyJSON structure has a 'products' array
+                    if (data.products && Array.isArray(data.products)) {
+                        allProducts.push(...data.products);
+                    }
+                });
+
+                // Display the actual number of products loaded
+                if (allProducts.length > 0) {
+                    productList.innerHTML = `<p style="text-align:center; padding-bottom: 20px;">Successfully loaded ${allProducts.length} products.</p>`;
+                }
+
+                renderProducts(allProducts);
+                populateFilters(allProducts);
+
+            } catch (error) {
+                productList.innerHTML = `<p class="error-message">Error fetching products: ${error.message}. Please check API connection and batch limits.</p>`;
+                console.error("Fetch error:", error);
+            }
+        }
+
+        // --- Filter Population ---
+        function populateFilters(products) {
+            // Use 'category' for DummyJSON products
+            const categories = [...new Set(products.map(p => p.category))];
+
+            // Clear previous categories before repopulating
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                // Simple formatting for display
+                option.textContent = category.replace(/-/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                categoryFilter.appendChild(option);
+            });
+        }
+
+        // --- Product Rendering (Price in PKR) ---
+        function renderProducts(products) {
+            productList.innerHTML = ''; // Clear status message/previous products
+
+            if (products.length === 0) {
+                productList.innerHTML = `<p style="text-align:center; padding: 40px;">No products found matching your criteria.</p>`;
+                return;
+            }
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('product-card');
+
+                // Calculate price in PKR
+                const priceUSD = product.price || 0;
+                const pricePKR = priceUSD * PKR_RATE;
+
+                // Placeholder image for robust error handling
+                const placeholder = 'https://placehold.co/300x200/cccccc/333333?text=Product+Image';
+
+                // DummyJSON uses 'thumbnail' or 'image' but fakestoreapi used 'image'. Using 'thumbnail' which is available on DummyJSON
+                const imageUrl = product.thumbnail || product.image;
+
+                card.innerHTML = `
+                    <div class="product-image-wrapper">
+                        <img 
+                            src="${imageUrl}" 
+                            alt="${product.title}" 
+                            class="product-image"
+                            onerror="this.onerror=null; this.src='${placeholder}';"
+                        >
+                    </div>
+                    <p class="product-category">${product.category}</p>
+                    <h3 class="product-title">${product.title}</h3>
+                    <p class="product-price">PKR ${pricePKR.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                `;
+                productList.appendChild(card);
+            });
+        }
+
+        // --- Filter and Search Logic ---
+        function applyFilters() {
+            let filteredProducts = [...allProducts];
+
+            // 1. Search Filter (by title)
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(p =>
+                    p.title.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // 2. Category Filter
+            const selectedCategory = categoryFilter.value;
+            if (selectedCategory) {
+                filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
+            }
+
+            // 3. Price Filter (still based on USD values defined in the filter options)
+            const selectedPrice = priceFilter.value;
+            if (selectedPrice) {
+                const [minStr, maxStr] = selectedPrice.split('-');
+                const min = parseFloat(minStr);
+
+                const max = maxStr === 'max' ? Infinity : parseFloat(maxStr);
+
+                filteredProducts = filteredProducts.filter(p => {
+                    const price = p.price || 0; // price is USD
+                    return price >= min && (max === Infinity || price <= max);
+                });
+            }
+
+            renderProducts(filteredProducts);
+        }
+
+        // --- Event Listeners for controls ---
+        searchInput.addEventListener('input', applyFilters);
+        categoryFilter.addEventListener('change', applyFilters);
+        priceFilter.addEventListener('change', applyFilters);
+
+        // Start the process
+        fetchProducts();
+    </script>
+</body>
+
+</html>
